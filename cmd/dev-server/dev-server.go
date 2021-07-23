@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
+	"runtime"
 	"strings"
 	"time"
 
@@ -15,11 +17,12 @@ import (
 
 const (
 	templateFolder = "./web/templates"
+	localPort      = ":8080"
 )
 
 func main() {
+	log.Println("dev-server started on port ", localPort)
 	needsRefresh := false
-
 	// Folder watcher
 	go func() {
 		fileWatch := map[string]time.Time{}
@@ -38,7 +41,7 @@ func main() {
 					// TODO: handle errors (e.g. file not found)
 					log.Fatal("Couldnt stat file", err)
 				}
-				if fileWatch[file.Name()] != info.ModTime() {
+				if info.ModTime().After(fileWatch[file.Name()]) {
 					fileWatch[file.Name()] = info.ModTime()
 					needsRefresh = true
 				}
@@ -96,11 +99,32 @@ func main() {
 	}).Methods(http.MethodGet)
 
 	devSrv := http.Server{
-		Addr:           ":8080",
+		Addr:           localPort,
 		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   120 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+
+	// Open localhost and start server
+	go open(fmt.Sprintf("http://localhost%s/index", localPort))
 	devSrv.ListenAndServe()
+}
+
+// open opens the specified URL in the default browser of the user.
+func open(url string) error {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
+	}
+	args = append(args, url)
+	return exec.Command(cmd, args...).Start()
 }
