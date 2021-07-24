@@ -56,7 +56,11 @@ func main() {
 		if needsRefresh {
 			log.Println("Forcing reload")
 			wr.WriteHeader(http.StatusUpgradeRequired)
+			return
 		}
+		// Weird quirk but with an empty response and status code for no content, Chrome still views it
+		// as a failed load
+		fmt.Fprint(wr, "{}")
 	}).Methods(http.MethodGet)
 	router.HandleFunc("/reload.js", func(wr http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(wr, `
@@ -85,8 +89,8 @@ func main() {
 			return
 		}
 		// Load and inject JS
-		tmpl, err := template.New(templateName).Parse(strings.Replace(string(templateFileContents), "</head>", `<script type="text/javascript" src="/reload.js"></script>
-		</head>`, 1))
+		tmpl, err := template.New(templateName).Parse(
+			strings.Replace(string(templateFileContents), "</head>", `<script type="text/javascript" src="/reload.js"></script></head>`, 1))
 		if err != nil || tmpl == nil {
 			fmt.Fprintf(wr, "Can't find template '%s' - %s", templateName, err)
 			return
@@ -97,6 +101,16 @@ func main() {
 			return
 		}
 	}).Methods(http.MethodGet)
+
+	// Disable Caching of results
+	router.Use(
+		func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(wr http.ResponseWriter, req *http.Request) {
+				wr.Header().Set("Cache-Control", "max-age=0, must-revalidate")
+				next.ServeHTTP(wr, req)
+			})
+		},
+	)
 
 	devSrv := http.Server{
 		Addr:           localPort,

@@ -6,7 +6,205 @@
     <title>Hello World</title>
     <link rel="stylesheet" href="/static/main.css" />
   </head>
-  <body>
-    <h1 class="p-20 text-2xl font-bold">Hello Bin Lover</h1>
+  <body class="h-full">
+    <div class="container">
+      <div class="flex flex-row w-screen min-h-screen">
+        <div class="flex flex-col justify-center bg-blue-50">
+          <img class="w-2/3 mx-auto mb-auto mt-auto" src="/static/img/preview.png" />
+        </div>
+
+        <div class="w-1/2">
+          <div class="px-4 mx-auto md:max-w-screen-sm mt-14">
+            <h1 class="mb-4 text-3xl text-center font-bold">Logo</h1>
+            <p class="mb-2 font-bold">Signup</p>
+            <hr class="border-gray-200 mb-4" />
+
+            <div class="w-full flex">
+              <div class="mb-4 w-full">
+                <label class="block text-gray-700 text-xs mb-2" for="username">
+                  First Name
+                </label>
+                <input
+                  class="
+                    shadow
+                    appearance-none
+                    border
+                    py-2
+                    px-3
+                    text-gray-700
+                    leading-tight
+                    focus:outline-none focus:shadow-outline
+                  "
+                  id="firstname"
+                  type="text"
+                  placeholder=""
+                />
+              </div>
+              <div class="mb-4 w-full">
+                <label class="block text-gray-700 text-xs mb-2" for="username">
+                  Last Name
+                </label>
+                <input
+                  class="
+                    shadow
+                    appearance-none
+                    border
+                    py-2
+                    px-3
+                    text-gray-700
+                    leading-tight
+                    focus:outline-none focus:shadow-outline
+                  "
+                  id="lastname"
+                  type="text"
+                  placeholder=""
+                />
+              </div>
+            </div>
+
+            <div class="w-full mb-4">
+              <label class="block text-gray-700 text-xs  mb-2" for="emailaddress">
+                Email Address
+              </label>
+              <input
+                class="
+                  shadow
+                  appearance-none
+                  border
+                  py-2
+                  px-3
+                  text-gray-700
+                  leading-tight
+                  focus:outline-none focus:shadow-outline
+                "
+                id="emailaddress"
+                type="text"
+                placeholder=""
+              />
+            </div>
+
+            <div class="w-full mb-4">
+              <label class="block text-gray-700 text-xs  mb-2" for="password">
+                Password
+              </label>
+              <input
+                class="
+                  shadow
+                  appearance-none
+                  border
+                  py-2
+                  px-3
+                  text-gray-700
+                  leading-tight
+                  focus:outline-none focus:shadow-outline
+                "
+                id="password"
+                type="password"
+                placeholder=""
+              />
+            </div>
+
+            <div class="w-full mb-4">
+              <label class="block text-gray-700 text-xs  mb-2" for="mobile">
+                Mobile Number
+              </label>
+              <input
+                class="
+                  shadow
+                  appearance-none
+                  border
+                  py-2
+                  px-3
+                  text-gray-700
+                  leading-tight
+                  focus:outline-none focus:shadow-outline
+                "
+                id="mobile"
+                type="text"
+                placeholder=""
+              />
+            </div>
+
+            <!-- selectors -->
+            <div class="flex justify-center items-center">
+              <div class="bg-gray-200 rounded-lg">
+                <div class="inline-flex rounded-lg">
+                  <input type="radio" name="room_type" id="Borrower" checked hidden />
+                  <label
+                    for="Borrower"
+                    class="
+                      radio
+                      text-center
+                      self-center
+                      py-2
+                      px-4
+                      rounded-lg
+                      cursor-pointer
+                      hover:opacity-75
+                    "
+                    >Borrower</label
+                  >
+                </div>
+                <div class="inline-flex rounded-lg">
+                  <input type="radio" name="room_type" id="Introducer" hidden />
+                  <label
+                    for="Introducer"
+                    class="
+                      radio
+                      text-center
+                      self-center
+                      py-2
+                      px-4
+                      rounded-lg
+                      cursor-pointer
+                      hover:opacity-75
+                    "
+                    >Introducer</label
+                  >
+                </div>
+                <div class="inline-flex rounded-lg">
+                  <input type="radio" name="room_type" id="Broker" hidden />
+                  <label
+                    for="Broker"
+                    class="
+                      radio
+                      text-center
+                      self-center
+                      py-2
+                      px-4
+                      rounded-lg
+                      cursor-pointer
+                      hover:opacity-75
+                    "
+                    >Broker</label
+                  >
+                </div>
+              </div>
+            </div>
+
+            <button
+              class="
+                block
+                bg-blue-500
+                hover:bg-teal-dark
+                text-white
+                w-full
+                mt-4
+                py-2
+                px-4
+                rounded-lg
+              "
+              type="submit"
+            >
+              Sign Up
+            </button>
+
+            <p class="text-center pt-4 text-xs text-gray-500">
+              Already have an account? <a class="text-blue-500 underline" href="">Sign in</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
