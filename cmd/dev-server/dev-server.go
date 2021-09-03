@@ -1,7 +1,9 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"github.com/ViBiOh/httputils/v4/pkg/prometheus"
 	"html/template"
 	"io/ioutil"
 	"log"
@@ -52,6 +54,14 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	staticRouter := router.PathPrefix("/static/")
 	staticRouter.Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
+
+	fs := flag.NewFlagSet("dev-server", flag.ExitOnError)
+	prometheusConfig := prometheus.Flags(fs, "prometheus")
+	prometheusApp := prometheus.New(prometheusConfig)
+
+	router.Handle("/metrics",  prometheusApp.Handler()).Methods(http.MethodGet)
+
+
 	router.HandleFunc("/reload", func(wr http.ResponseWriter, req *http.Request) {
 		if needsRefresh {
 			log.Println("Forcing reload")
