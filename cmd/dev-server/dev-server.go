@@ -18,8 +18,11 @@ import (
 )
 
 const (
-	templateFolder = "./web/templates"
-	localPort      = ":8080"
+	templateFolder  = "./web/templates"
+	resourceFolder  = "./web/static"
+	localPort       = ":8080"
+	refreshInterval = 1 * time.Second
+	openOn          = "index"
 )
 
 func main() {
@@ -53,14 +56,13 @@ func main() {
 
 	router := mux.NewRouter().StrictSlash(true)
 	staticRouter := router.PathPrefix("/static/")
-	staticRouter.Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
+	staticRouter.Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(resourceFolder))))
 
 	fs := flag.NewFlagSet("dev-server", flag.ExitOnError)
 	prometheusConfig := prometheus.Flags(fs, "prometheus")
 	prometheusApp := prometheus.New(prometheusConfig)
 
-	router.Handle("/metrics",  prometheusApp.Handler()).Methods(http.MethodGet)
-
+	router.Handle("/metrics", prometheusApp.Handler()).Methods(http.MethodGet)
 
 	router.HandleFunc("/reload", func(wr http.ResponseWriter, req *http.Request) {
 		if needsRefresh {
@@ -73,26 +75,23 @@ func main() {
 		fmt.Fprint(wr, "{}")
 	}).Methods(http.MethodGet)
 	router.HandleFunc("/reload.js", func(wr http.ResponseWriter, req *http.Request) {
-		fmt.Fprintf(wr, `
+		fmt.Fprintf(wr, fmt.Sprintf(`
 		setInterval(function() {
 			fetch("/reload")
-			.then(function (response) {
-				return response;
-			})
 			.then(function (res) {
 				if (res.status == 426) {
 					window.location.reload(true);
 				}
 			})
-		}, 1000);
-		`)
+		}, %d);
+		`, refreshInterval.Milliseconds()))
 		needsRefresh = false
 	}).Methods(http.MethodGet)
 
 	router.HandleFunc("/{template_name}", func(wr http.ResponseWriter, req *http.Request) {
 
 		templateName := mux.Vars(req)["template_name"]
-		templatePath := fmt.Sprintf("./web/templates/%s.tpl.html", templateName)
+		templatePath := fmt.Sprintf("%s/%s.tpl.html", templateFolder, templateName)
 		templateFileContents, err := ioutil.ReadFile(templatePath)
 		if err != nil {
 			fmt.Fprintf(wr, "Can't read file '%s' - %s", templatePath, err)
@@ -103,6 +102,11 @@ func main() {
 			strings.Replace(string(templateFileContents), "</head>", `<script type="text/javascript" src="/reload.js"></script></head>`, 1))
 		if err != nil || tmpl == nil {
 			fmt.Fprintf(wr, "Can't find template '%s' - %s", templateName, err)
+			return
+		}
+		_, err = tmpl.ParseGlob(fmt.Sprintf("%s/*", templateFolder))
+		if err != nil {
+			fmt.Fprintf(wr, "Can't load more template '%s' - %s", templateName, err)
 			return
 		}
 		err = tmpl.ExecuteTemplate(wr, templateName, nil)
@@ -131,7 +135,7 @@ func main() {
 	}
 
 	// Open localhost and start server
-	go open(fmt.Sprintf("http://localhost%s/index", localPort))
+	go open(fmt.Sprintf("http://localhost%s/%s", localPort, openOn))
 	devSrv.ListenAndServe()
 }
 
